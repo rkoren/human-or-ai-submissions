@@ -37,12 +37,14 @@ train_df, val_df = load_split()   # 8,000 / 2,000 rows, both 50% AI
 | `src/models.py` | model factories from notebook 02: `make_tfidf_lr`, `make_masked_lr` (and flat variant); each takes raw text |
 | `src/clusters.py` | the 10 topic clusters from notebook 01 (no labels used) and the fiction cluster id |
 | `src/split.py` | creates `splits/val_ids.csv` |
+| `src/q3_unlabeled.py` | report section 3: self-training with pseudo-labels from `unlabeled.csv` vs supervised |
 | `src/q4_analysis.py` | report section 4: train vs val, subgroup AUROC, FP/FN tables |
 
 ## Report experiments
 
 ```bash
+python -m src.q3_unlabeled --model masked_lr    # writes results/q3/masked_lr/
 python -m src.q4_analysis --model masked_lr     # writes results/q4/masked_lr/
 ```
 
-Outputs are small CSVs plus `summary.md` under `results/`, so the report tables can be copied from there.
+Outputs are small CSVs plus `summary.md` under `results/`, so the report tables can be copied from there. Draft LaTeX answers for sections 3 and 4 are in `report/`.
