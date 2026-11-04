@@ -10,31 +10,31 @@ On the fixed 8{,}000/2{,}000 split (seed 42) the masked n-gram logistic regressi
 
 % ===== Q4.2 =====
 \question{Q4.2 [5 points].}{Evaluate performance over at least three text-length bins (define the bins), or another observable subgroup available in your data. Explain why you chose the grouping.}
-\begin{tabularx}{\linewidth}{@{}Yrr@{}}\toprule Subgroup / bin & Count & Validation AUROC \ \midrule
-Short: $<150$ words & 404 & 0.9885 \
-Medium: 150--249 words & 1{,}055 & 0.9967 \
-Long: $\geq 250$ words & 541 & 0.9954 \
+\begin{tabularx}{\linewidth}{@{}Yrr@{}}\toprule Subgroup / bin & Count & Validation AUROC \\ \midrule
+Short: $<150$ words & 404 & 0.9885 \\
+Medium: 150--249 words & 1{,}055 & 0.9967 \\
+Long: $\geq 250$ words & 541 & 0.9954 \\
 \midrule
-Format: blank lines between paragraphs & 689 & 1.0000 \
-Format: single line breaks only & 709 & 0.9616 \
-Format: no line breaks & 602 & 0.9838 \
+Format: blank lines between paragraphs & 689 & 1.0000 \\
+Format: single line breaks only & 709 & 0.9616 \\
+Format: no line breaks & 602 & 0.9838 \\
 \bottomrule\end{tabularx}
 \par\noindent
 We binned by word count because the rubric suggests it and because a bag-of-n-grams model simply has less evidence in a short passage. We added the line-break format because Notebook 02 showed it is the single strongest feature. Short passages are clearly the hardest length bin: 5.9\% errors versus 1.2\% for medium passages. Format matters even more. Passages with blank lines are 99.6\% AI in the validation set and the model gets every one right, while passages with only single line breaks (93\% human) have the lowest AUROC. By topic cluster (results/q4/masked\_lr/q42\_by\_topic.csv), the fiction cluster has the highest error rate, 9.8\%, but only 41 validation rows, which is a concern because about 36\% of the test set falls into that cluster.
 
 % ===== Q4.3 =====
 \question{Q4.3 [5 points].}{Analyze at least \textbf{five false positives and five false negatives} from your held-out validation set. Provide example IDs, predicted probabilities, and short failure hypotheses. Do not paste full passages unless essential.}
-\begin{tabularx}{\linewidth}{@{}p{0.64in}p{0.70in}p{0.98in}Y@{}}\toprule ID & Error type & P(AI) & Possible reason \ \midrule
-\mbox{1898} & FP & 0.738 & Human psychology article in a formal, textbook register with a single line break before a sub-heading (``Modelling''), a layout the model mostly sees in AI text. \
-\mbox{3139} & FP & 0.689 & Human encyclopedia entry on fluid power: long sentences, lists of technical nouns and no line breaks; with topic words masked, little remains to mark it as human. \
-\mbox{3155} & FP & 0.619 & Human book summary with a double space after a sentence and one paragraph break; neutral, polished prose close to the AI style. \
-\mbox{151} & FP & 0.595 & Short (79 words) movie review with a typo (``berween''); too few n-grams for confident evidence, and the review-style quotes resemble AI film summaries. \
-\mbox{1038} & FP & 0.582 & Human history article with en-dashes and many proper nouns; formal encyclopedic register again. \
-\mbox{5498} & FN & 0.010 & AI recipe written in the human source format: an ingredient list with one item per line and no blank lines, the strongest ``human'' cue in training. \
-\mbox{5010} & FN & 0.027 & AI biography that imitates Wikipedia, including leftover footnote digits (``California1'', ``miniseries.2''), with no line breaks. \
-\mbox{9298} & FN & 0.028 & AI biography of a comedian with quoted titles and a single line break between paragraphs, matching human Wikipedia formatting. \
-\mbox{5929} & FN & 0.072 & AI recipe with messy spacing, missing line breaks between items and a typo (``yollk''), so it looks like a hastily typed human recipe. \
-\mbox{1614} & FN & 0.080 & Short first-person diary-style passage (``I've never felt more alone'') with contractions and no line breaks; informal first-person text is overwhelmingly human in training. \
+\begin{tabularx}{\linewidth}{@{}p{0.64in}p{0.70in}p{0.98in}Y@{}}\toprule ID & Error type & P(AI) & Possible reason \\ \midrule
+\mbox{1898} & FP & 0.738 & Human psychology article in a formal, textbook register with a single line break before a sub-heading (``Modelling''), a layout the model mostly sees in AI text. \\
+\mbox{3139} & FP & 0.689 & Human encyclopedia entry on fluid power: long sentences, lists of technical nouns and no line breaks; with topic words masked, little remains to mark it as human. \\
+\mbox{3155} & FP & 0.619 & Human book summary with a double space after a sentence and one paragraph break; neutral, polished prose close to the AI style. \\
+\mbox{151} & FP & 0.595 & Short (79 words) movie review with a typo (``berween''); too few n-grams for confident evidence, and the review-style quotes resemble AI film summaries. \\
+\mbox{1038} & FP & 0.582 & Human history article with en-dashes and many proper nouns; formal encyclopedic register again. \\
+\mbox{5498} & FN & 0.010 & AI recipe written in the human source format: an ingredient list with one item per line and no blank lines, the strongest ``human'' cue in training. \\
+\mbox{5010} & FN & 0.027 & AI biography that imitates Wikipedia, including leftover footnote digits (``California1'', ``miniseries.2''), with no line breaks. \\
+\mbox{9298} & FN & 0.028 & AI biography of a comedian with quoted titles and a single line break between paragraphs, matching human Wikipedia formatting. \\
+\mbox{5929} & FN & 0.072 & AI recipe with messy spacing, missing line breaks between items and a typo (``yollk''), so it looks like a hastily typed human recipe. \\
+\mbox{1614} & FN & 0.080 & Short first-person diary-style passage (``I've never felt more alone'') with contractions and no line breaks; informal first-person text is overwhelmingly human in training. \\
 \bottomrule\end{tabularx}
 \smallnote{Decision threshold 0.5. Examples are the five most confident errors of each type; all 52 validation errors are listed in results/q4/masked\_lr/q43\_all\_errors.csv.}
 

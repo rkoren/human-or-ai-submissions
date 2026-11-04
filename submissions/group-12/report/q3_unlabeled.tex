@@ -11,12 +11,12 @@ We used confidence-based self-training. A teacher model (the masked n-gram logis
 
 % ===== Q3.2 =====
 \question{Q3.2 [2 points].}{Compare against a supervised baseline under the same held-out validation protocol.}
-\begin{tabularx}{\linewidth}{@{}Yp{1.5in}@{}}\toprule Method & Validation AUROC \ \midrule
-Supervised only (masked n-grams + LR, 8{,}000 rows) & 0.9949 \
-With unlabeled data (self-training, best of 8 settings: $t=0.6$, 1 round, +2{,}906 rows) & 0.9948 \
+\begin{tabularx}{\linewidth}{@{}Yp{1.5in}@{}}\toprule Method & Validation AUROC \\ \midrule
+Supervised only (masked n-grams + LR, 8{,}000 rows) & 0.9949 \\
+With unlabeled data (self-training, best of 8 settings: $t=0.6$, 1 round, +2{,}906 rows) & 0.9948 \\
 \midrule
-Supervised only (word+char TF-IDF + LR baseline) & 0.9511 \
-With unlabeled data (self-training, best setting: $t=0.6$, 1 round, +2{,}683 rows) & 0.9510 \
+Supervised only (word+char TF-IDF + LR baseline) & 0.9511 \\
+With unlabeled data (self-training, best setting: $t=0.6$, 1 round, +2{,}683 rows) & 0.9510 \\
 \bottomrule\end{tabularx}
 \smallnote{All eight threshold/round settings are in results/q3/\textless model\textgreater/q32\_results.csv. For the masked model every setting lands between 0.9947 and 0.9948; for the TF-IDF baseline between 0.9502 and 0.9510.}
 
