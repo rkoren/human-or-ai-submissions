@@ -1,50 +1,84 @@
-# CS5785 Kaggle Competition
+# Group 12: Human or AI?
 
-Human or AI? text classification (AUROC). Notebooks hold the exploration; `src/` holds the
-shared, re-runnable pieces that the report experiments build on.
+**Team members:** Reilly Koren (TODO NetID), Hazel Xue (TODO NetID), TODO third member (TODO NetID)
+**Kaggle team name:** `group-12` (TODO: confirm it matches the leaderboard)
+
+**Final model:** Qwen2.5-1.5B fine-tuned with LoRA on all 10,000 training passages (TODO: or its rank average with Qwen2.5-0.5B, whichever we pick). Public leaderboard 0.985.
+**Pretrained weights:** [`Qwen/Qwen2.5-0.5B`](https://huggingface.co/Qwen/Qwen2.5-0.5B) and [`Qwen/Qwen2.5-1.5B`](https://huggingface.co/Qwen/Qwen2.5-1.5B), both Apache-2.0, downloaded from Hugging Face.
 
 ## Setup
 
+Python 3.12 locally. GPU runs used Kaggle's image: Python 3.13, torch 2.11, transformers 5.20.2, peft 0.21.2, on a Tesla T4.
+
 ```bash
-python -m venv .venv            # or: uv venv .venv
-.venv/Scripts/activate          # Windows; use source .venv/bin/activate on Mac/Linux
+cd submissions/group-12
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 kaggle competitions download -c cornell-tech-cs-5785-combined-2026-ai-vs-human-text -p data
-# unzip into data/ so that data/train.csv, data/unlabeled.csv, data/test.csv exist (data/ is git-ignored)
+unzip data/*.zip -d data         # data/train.csv, unlabeled.csv, test.csv, sample_submission.csv (not committed)
 ```
 
-## Shared validation split (use this for every report experiment)
+## What's where
 
-The rubric requires one fixed stratified 2,000-row validation set from `train.csv`, reused across
-all comparisons. It is committed as `splits/val_ids.csv` (seed 42) and was created with:
+| Path | What it has |
+|---|---|
+| `notebooks/01_eda.ipynb` | EDA: duplicates, length, style features, adversarial validation, topic clusters |
+| `notebooks/02_init_model.ipynb` | Non-LM models: TF-IDF, style features, masked n-grams, and a variant with linebreaks removed |
+| `notebooks/03_qwen_experiment.ipynb` | Qwen2.5-0.5B LoRA fine-tune, scored with leave-cluster-out CV and on the fixed validation split |
+| `notebooks/04_qwen_final.ipynb` | Leaderboard runs: one model on all train, test pseudo-labeling, Qwen2.5-1.5B, final submission files |
+| `src/data.py` | Paths, `load_train` / `load_unlabeled` / `load_test`, `load_split` |
+| `src/models.py` | Model factories from notebook 02: `make_tfidf_lr`, `make_masked_lr` (and the flat variant), each taking raw text |
+| `src/clusters.py` | The 10 topic clusters from notebook 01 (no labels used) and the fiction cluster id |
+| `src/split.py` | Creates `splits/val_ids.csv` |
+| `src/q3_unlabeled.py`, `src/q4_analysis.py` | Report Q3 (self-training with `unlabeled.csv`) and Q4 (train vs validation, subgroups, errors) |
+| `results/` | Saved Qwen predictions (`03/`, `04/`) and report tables (`q3/`, `q4/`) |
+| `report/` | Draft LaTeX answers for report sections 3 and 4 |
 
-```bash
-python -m src.split
-```
+## Train and evaluate on the validation protocol
 
-Load it in any script or notebook with:
+Every comparison in the report uses one fixed stratified split of `train.csv`: 8,000 training and 2,000 validation rows. It's committed as `splits/val_ids.csv` (seed 42, created by `python -m src.split`) and loads with:
 
 ```python
 from src.data import load_split
 train_df, val_df = load_split()   # 8,000 / 2,000 rows, both 50% AI
 ```
 
-## Modules
-
-| File | What it has |
-|---|---|
-| `src/data.py` | paths, `load_train/unlabeled/test`, `load_split` |
-| `src/models.py` | model factories from notebook 02: `make_tfidf_lr`, `make_masked_lr` (and flat variant); each takes raw text |
-| `src/clusters.py` | the 10 topic clusters from notebook 01 (no labels used) and the fiction cluster id |
-| `src/split.py` | creates `splits/val_ids.csv` |
-| `src/q3_unlabeled.py` | report section 3: self-training with pseudo-labels from `unlabeled.csv` vs supervised |
-| `src/q4_analysis.py` | report section 4: train vs val, subgroup AUROC, FP/FN tables |
-
-## Report experiments
-
 ```bash
-python -m src.q3_unlabeled --model masked_lr    # writes results/q3/masked_lr/
-python -m src.q4_analysis --model masked_lr     # writes results/q4/masked_lr/
+python -m src.q3_unlabeled --model masked_lr   # report Q3, writes results/q3/masked_lr/
+python -m src.q4_analysis --model masked_lr    # report Q4, writes results/q4/masked_lr/
+cd notebooks
+jupyter nbconvert --to notebook --execute --inplace 02_init_model.ipynb       # CPU, about 1 min
+jupyter nbconvert --to notebook --execute --inplace 03_qwen_experiment.ipynb  # loads saved Qwen predictions
 ```
 
-Outputs are small CSVs plus `summary.md` under `results/`, so the report tables can be copied from there. Draft LaTeX answers for sections 3 and 4 are in `report/`.
+Notebooks 03 and 04 load the saved Qwen predictions in `results/03/` and `results/04/`, so they run on a laptop in seconds. To retrain, delete those files and run the notebook on a GPU. We used Kaggle notebooks with the competition data attached, a T4 GPU and internet on, then copied the CSVs from `/kaggle/working` back into `results/`. Approximate T4 training times:
+- 03: about 85 min for the 5 cross-validation folds, plus 14 min for the fixed-split model
+- 04: 13 min for the 0.5B on all train, 28 min for pseudo-labeling, 40 min for the 1.5B
+
+## Write submission.csv
+
+```bash
+cd notebooks
+jupyter nbconvert --to notebook --execute --inplace 04_qwen_final.ipynb
+cp ../submissions/04_qwen15b_all_train.csv ../submission.csv   # TODO: or 04_qwen05b_plus_15b_rank_avg.csv
+```
+
+04 writes two candidates:
+- `04_qwen15b_all_train.csv`: the 1.5B model alone, public 0.98523
+- `04_qwen05b_plus_15b_rank_avg.csv`: its rank average with the 0.5B model, public 0.98529
+
+## Seeds and config
+
+- **Seed 77:** topic clusters (KMeans), leave-cluster-out folds, Qwen training (weights init and batch order), and the pseudo-label test halves.
+- **Seed 42:** the fixed validation split.
+- **Qwen settings:**
+  - LoRA: r=16, alpha=32, dropout 0, on all attention and MLP projections
+  - Optimizer: AdamW, lr 1e-4, 10% warmup then linear decay
+  - Training: 1 epoch, batch 8, max 512 tokens, fp16 autocast on GPU
+  - The 1.5B model also uses gradient checkpointing.
+- GPU training isn't bit-for-bit deterministic, so reruns can differ slightly in the last digits.
+
+## AI assistance
+
+TODO (team, matching report Q6.3): which tools we used (for example Claude Code, ChatGPT, Copilot), what for (code, debugging, analysis, writing), and what we checked or changed ourselves.
