@@ -1,0 +1,6 @@
+data/
+submissions/
+.ipynb_checkpoints/
+.DS_Store
+__pycache__/
+.venv/
