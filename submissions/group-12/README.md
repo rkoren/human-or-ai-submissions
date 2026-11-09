@@ -26,15 +26,16 @@ unzip data/*.zip -d data         # data/train.csv, unlabeled.csv, test.csv, samp
 | `notebooks/01_eda.ipynb` | EDA: duplicates, length, style features, validation, topic clusters |
 | `notebooks/02_init_model.ipynb` | Non-LM models: TF-IDF, style features, masked n-grams, and a variant with linebreaks removed |
 | `notebooks/03_qwen_experiment.ipynb` | Qwen2.5-0.5B LoRA fine-tune|
-| `notebooks/04_qwen_final.ipynb` | One model on all training data with test pseudo-labeling, Qwen2.5-1.5B |
+| `notebooks/04_qwen_final.ipynb` | One model on all training data and testinh pseudo-labeling. Qwen2.5-1.5B, and its score on the validation split |
 | `src/data.py` | Paths, `load_train` / `load_unlabeled` / `load_test`, `load_split` |
-| `src/models.py` | Model factories from notebook 02: `make_tfidf_lr`, `make_masked_lr` (and the flat variant), each taking raw text |
+| `src/models.py` | Model factories from notebook 02: `make_tfidf_lr`, `make_masked_lr` (and the flat variant), `make_style_gb` (24 style features + gradient boosting), each taking raw text |
 | `src/clusters.py` | The 10 topic clusters from notebook 01 (no labels used) and the fiction cluster id |
 | `src/split.py` | Creates `splits/val_ids.csv` |
+| `src/q1_model_selection.py` | Report Q1: TF-IDF, masked n-grams and style features, each tuned with 5-fold CV on the 8,000 training rows and scored once on validation |
 | `src/q2_learning_curve.py` | Report Q2: nested, class-balanced learning-curve experiment from 500 to 8,000 rows |
 | `src/q3_unlabeled.py`, `src/q4_analysis.py` | Report Q3 (self-training with `unlabeled.csv`) and Q4 (train vs validation, subgroups, errors) |
-| `results/` | Saved Qwen predictions (`03/`, `04/`) and report tables/figures (`q2/`, `q3/`, `q4/`) |
-| `report/` | Draft LaTeX answers for report sections 2, 3, and 4 |
+| `results/` | Saved Qwen predictions (`03/`, `04/`) and report tables/figures (`q1/`, `q2/`, `q3/`, `q4/`) |
+| `report/` | Draft LaTeX answers for report sections 1 to 5, and  a list of references (`references.tex`) |
 
 ## Train and evaluate on the validation protocol
 
@@ -46,6 +47,7 @@ train_df, val_df = load_split()
 ```
 
 ```bash
+python -m src.q1_model_selection               # report Q1, writes results/q1/
 python -m src.q2_learning_curve --model masked_lr # report Q2, writes results/q2/masked_lr/
 python -m src.q3_unlabeled --model masked_lr   # report Q3, writes results/q3/masked_lr/
 python -m src.q4_analysis --model masked_lr    # report Q4, writes results/q4/masked_lr/
