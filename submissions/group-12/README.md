@@ -31,9 +31,10 @@ unzip data/*.zip -d data         # data/train.csv, unlabeled.csv, test.csv, samp
 | `src/models.py` | Model factories from notebook 02: `make_tfidf_lr`, `make_masked_lr` (and the flat variant), each taking raw text |
 | `src/clusters.py` | The 10 topic clusters from notebook 01 (no labels used) and the fiction cluster id |
 | `src/split.py` | Creates `splits/val_ids.csv` |
+| `src/q2_learning_curve.py` | Report Q2: nested, class-balanced learning-curve experiment from 500 to 8,000 rows |
 | `src/q3_unlabeled.py`, `src/q4_analysis.py` | Report Q3 (self-training with `unlabeled.csv`) and Q4 (train vs validation, subgroups, errors) |
-| `results/` | Saved Qwen predictions (`03/`, `04/`) and report tables (`q3/`, `q4/`) |
-| `report/` | Draft LaTeX answers for report sections 3 and 4 |
+| `results/` | Saved Qwen predictions (`03/`, `04/`) and report tables/figures (`q2/`, `q3/`, `q4/`) |
+| `report/` | Draft LaTeX answers for report sections 2, 3, and 4 |
 
 ## Train and evaluate on the validation protocol
 
@@ -45,6 +46,7 @@ train_df, val_df = load_split()
 ```
 
 ```bash
+python -m src.q2_learning_curve --model masked_lr # report Q2, writes results/q2/masked_lr/
 python -m src.q3_unlabeled --model masked_lr   # report Q3, writes results/q3/masked_lr/
 python -m src.q4_analysis --model masked_lr    # report Q4, writes results/q4/masked_lr/
 cd notebooks
