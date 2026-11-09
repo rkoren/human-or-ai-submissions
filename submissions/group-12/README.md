@@ -26,7 +26,7 @@ unzip data/*.zip -d data         # data/train.csv, unlabeled.csv, test.csv, samp
 | `notebooks/01_eda.ipynb` | EDA: duplicates, length, style features, validation, topic clusters |
 | `notebooks/02_init_model.ipynb` | Non-LM models: TF-IDF, style features, masked n-grams, and a variant with linebreaks removed |
 | `notebooks/03_qwen_experiment.ipynb` | Qwen2.5-0.5B LoRA fine-tune|
-| `notebooks/04_qwen_final.ipynb` | One model on all training data and testinh pseudo-labeling. Qwen2.5-1.5B, and its score on the validation split |
+| `notebooks/04_qwen_final.ipynb` | One model on all training data and test pseudo-labeling, Qwen2.5-1.5B, and its score on the validation split |
 | `src/data.py` | Paths, `load_train` / `load_unlabeled` / `load_test`, `load_split` |
 | `src/models.py` | Model factories from notebook 02: `make_tfidf_lr`, `make_masked_lr` (and the flat variant), `make_style_gb` (24 style features + gradient boosting), each taking raw text |
 | `src/clusters.py` | The 10 topic clusters from notebook 01 (no labels used) and the fiction cluster id |
@@ -35,7 +35,7 @@ unzip data/*.zip -d data         # data/train.csv, unlabeled.csv, test.csv, samp
 | `src/q2_learning_curve.py` | Report Q2: nested, class-balanced learning-curve experiment from 500 to 8,000 rows |
 | `src/q3_unlabeled.py`, `src/q4_analysis.py` | Report Q3 (self-training with `unlabeled.csv`) and Q4 (train vs validation, subgroups, errors) |
 | `results/` | Saved Qwen predictions (`03/`, `04/`) and report tables/figures (`q1/`, `q2/`, `q3/`, `q4/`) |
-| `report/` | Draft LaTeX answers for report sections 1 to 5, and  a list of references (`references.tex`) |
+| `report/` | Draft LaTeX answers for report sections 1 to 5, and a list of references (`references.tex`) |
 
 ## Train and evaluate on the validation protocol
 
