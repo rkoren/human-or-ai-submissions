@@ -1,9 +1,9 @@
 # Group 12: Human or AI?
 
 **Team members:** Reilly Koren (rk856), Hazel Xue (hx342), Melinda Xu (qx234)
-**Kaggle team name:** `group-12`
+**Kaggle team name:** Group 12 (team folder and branch: `group-12`)
 
-**Final model:** Qwen2.5-1.5B fine-tuned with LoRA on all 10,000 training passages (pending)
+**Final model:** Qwen2.5-1.5B fine-tuned with LoRA on all 10,000 training passages
 **Pretrained weights:** [`Qwen/Qwen2.5-0.5B`](https://huggingface.co/Qwen/Qwen2.5-0.5B) and [`Qwen/Qwen2.5-1.5B`](https://huggingface.co/Qwen/Qwen2.5-1.5B)
 
 ## Setup
@@ -64,10 +64,10 @@ Notebooks 03 and 04 load the saved Qwen predictions in `results/03/` and `result
 ```bash
 cd notebooks
 jupyter nbconvert --to notebook --execute --inplace 04_qwen_final.ipynb
-cp ../submissions/04_qwen15b_all_train.csv ../submission.csv   # TODO: or 04_qwen05b_plus_15b_rank_avg.csv
+cp ../submissions/04_qwen15b_all_train.csv ../submission.csv
 ```
 
-04 writes two candidates:
+04 writes two candidates, and our final submission is the first:
 - `04_qwen15b_all_train.csv`: the 1.5B model alone, public 0.98523
 - `04_qwen05b_plus_15b_rank_avg.csv`: its rank average with the 0.5B model, public 0.98529
 
@@ -83,6 +83,8 @@ cp ../submissions/04_qwen15b_all_train.csv ../submission.csv   # TODO: or 04_qwe
 
 ## AI assistance
 
-We used Claude Code to develop the jupyter notebooks used for our models, as well as exploring potential experiments
-based on similar Kaggle competitions. We also used it to fill in information/documentation and port over our work
-that we began in a separate repo.
+**Hanyu Xue:** I used Claude Code as a coding assistant to implement the validation-split, Section 3 and Section 4 experiment scripts. I decided which experiments to run and directed the switch of the Section 4 analysis from the masked n-gram model to Qwen. I reran the Section 4 analysis myself to confirm the reported numbers, read the listed error passages, and revised the failure hypotheses and conclusions where my reading differed.
+
+**Qianya Xu:** I used Codex for debugging assistance on the Section 2 learning-curve experiment, guidance with the GitHub workflow, and polishing the report text. I drafted the code, checked that the experiment used the shared fixed validation split, reviewed the generated results table and learning-curve figure, verified the reported AUROC values against the saved outputs, and wrote the final explanation in my own words.
+
+**Reilly Koren:** I used Claude Code in the notebooks to implement and tune n-grams and the Qwen + LoRA setup, as well as setup pre-processing like the masking and style features. I also used it to trigger and time the Qwen training runs on the Kaggle GPUs, document the notebook work, and port over what we had in the original repo to the fork.
