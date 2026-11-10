@@ -1,7 +1,9 @@
 """Q4: generalization and error analysis on the fixed validation split.
 
-Run from repo root:  python -m src.q4_analysis [--model masked_lr]
-Writes results/q4/*.csv and results/q4/summary.md (numbers for report section 4).
+Run from submissions/group-12:
+    python -m src.q4_analysis --model masked_lr
+    python -m src.q4_analysis --preds results/03/03_qwen2.5-0.5b_fixed_split.csv --name qwen05b_lora
+Writes results/q4/<name>/*.csv and summary.md (numbers for report section 4).
 """
 import argparse
 import time
@@ -50,8 +52,13 @@ def group_auroc(df, col):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="masked_lr", choices=list(MODELS))
+    ap.add_argument("--preds", help="CSV of saved P(AI) for all train.csv ids from a model fit on the "
+                                    "8,000-row training partition (e.g. results/03/03_qwen2.5-0.5b_fixed_split.csv)")
+    ap.add_argument("--pred-col", default="qwen", help="probability column in --preds")
+    ap.add_argument("--name", help="output folder / model label when using --preds")
     args = ap.parse_args()
-    out = RESULTS_DIR / "q4" / args.model
+    name = (args.name or "saved_preds") if args.preds else args.model
+    out = RESULTS_DIR / "q4" / name
     out.mkdir(parents=True, exist_ok=True)
 
     train, val = load_split()
@@ -59,15 +66,25 @@ def main():
     train = add_meta(train, clusters["train"], top_terms, fiction)
     val = add_meta(val, clusters["train"], top_terms, fiction)
 
-    t0 = time.time()
-    model = MODELS[args.model]().fit(train["text"], train["label"])
-    fit_s = time.time() - t0
-    train["p_ai"] = model.predict_proba(train["text"])[:, 1]
-    val["p_ai"] = model.predict_proba(val["text"])[:, 1]
+    if args.preds:
+        # GPU models are trained in a notebook; reuse their saved fixed-split predictions here
+        saved = pd.read_csv(args.preds)
+        if "is_val" in saved:
+            assert set(saved.loc[saved["is_val"], "id"]) == set(val["id"]), "--preds was made with a different split"
+        p_by_id = saved.set_index("id")[args.pred_col]
+        train["p_ai"], val["p_ai"] = train["id"].map(p_by_id), val["id"].map(p_by_id)
+        assert train["p_ai"].notna().all() and val["p_ai"].notna().all(), "--preds is missing some ids"
+        fit_s = np.nan
+    else:
+        t0 = time.time()
+        model = MODELS[args.model]().fit(train["text"], train["label"])
+        fit_s = time.time() - t0
+        train["p_ai"] = model.predict_proba(train["text"])[:, 1]
+        val["p_ai"] = model.predict_proba(val["text"])[:, 1]
 
     # Q4.1 train vs validation
     q41 = pd.DataFrame([{
-        "model": args.model, "train rows": len(train), "val rows": len(val),
+        "model": name, "train rows": len(train), "val rows": len(val),
         "train AUROC": roc_auc_score(train["label"], train["p_ai"]),
         "val AUROC": roc_auc_score(val["label"], val["p_ai"]),
         "train error@0.5": ((train["p_ai"] > THRESHOLD) != train["label"]).mean(),
@@ -111,7 +128,7 @@ def main():
     err_by_topic.to_csv(out / "q44_errors_by_topic.csv")
 
     with open(out / "summary.md", "w", encoding="utf-8") as f:
-        f.write(f"# Q4 results: {args.model} (threshold {THRESHOLD}, split seed 42)\n\n")
+        f.write(f"# Q4 results: {name} (threshold {THRESHOLD}, split seed 42)\n\n")
         f.write("## Q4.1 train vs validation\n\n" + q41.round(4).to_markdown(index=False) + "\n\n")
         f.write("## Q4.2 by length bin\n\n" + by_len.round(4).to_markdown(index=False) + "\n\n")
         f.write("## Q4.2 by linebreak format\n\n" + by_fmt.round(4).to_markdown(index=False) + "\n\n")

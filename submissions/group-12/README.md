@@ -51,6 +51,7 @@ python -m src.q1_model_selection               # report Q1, writes results/q1/
 python -m src.q2_learning_curve --model masked_lr # report Q2, writes results/q2/masked_lr/
 python -m src.q3_unlabeled --model masked_lr   # report Q3, writes results/q3/masked_lr/
 python -m src.q4_analysis --model masked_lr    # report Q4, writes results/q4/masked_lr/
+python -m src.q4_analysis --preds results/03/03_qwen2.5-0.5b_fixed_split.csv --name qwen05b_lora   # report Q4 on the saved Qwen fixed-split predictions
 cd notebooks
 jupyter nbconvert --to notebook --execute --inplace 02_init_model.ipynb
 jupyter nbconvert --to notebook --execute --inplace 03_qwen_experiment.ipynb
